@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
-import AuthService from '../services/AuthService';
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/authSlice';
 import Spinner from './Spinner';
-import { login } from '../services/apiServices';
+import { login as apiLogin } from '../services/apiServices';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      const response = await login(email, password);
-      AuthService.login(response.data.access_token);
-      navigate('/dashboard');
+      const response = await apiLogin(email, password);
+      if (response.data.access_token) {
+        dispatch(login(response.data.access_token));
+      }
     } catch (err) {
       setError('Failed to login. Please check your credentials and try again.');
     } finally {
